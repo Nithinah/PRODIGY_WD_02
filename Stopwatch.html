@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stopwatch</title>
+  <link rel="stylesheet" href="stopwatch.css">
+</head>
+<body>
+  <h1 id="display">00:00:00</h1>
+  <button id="startStop">Start</button>
+  <button id="reset">Reset</button>
+  <button id="lap">Lap</button>
+  <ul id="laps"></ul>
+
+  <script>
+    let timer;
+    let running = false;
+    let startTime;
+    let lapCount = 0;
+
+    function startStop() {
+      if (running) {
+        clearInterval(timer);
+        document.getElementById('startStop').innerText = 'Start';
+        running = false;
+      } else {
+        startTime = Date.now() - (lapCount > 0 ? lapCount * 1000 : 0);
+        timer = setInterval(updateDisplay, 10);
+        document.getElementById('startStop').innerText = 'Stop';
+        running = true;
+      }
+    }
+
+    function reset() {
+      clearInterval(timer);
+      document.getElementById('display').innerText = '00:00:00';
+      document.getElementById('startStop').innerText = 'Start';
+      document.getElementById('laps').innerHTML = '';
+      running = false;
+      lapCount = 0;
+    }
+
+    function recordLap() {
+      if (!running) return;
+      lapCount++;
+      const lapTime = calculateLapTime();
+      const lapItem = document.createElement('li');
+      lapItem.innerText = `Lap ${lapCount}: ${lapTime}`;
+      document.getElementById('laps').appendChild(lapItem);
+    }
+
+    function updateDisplay() {
+      const elapsedTime = Date.now() - startTime;
+      const formattedTime = formatTime(elapsedTime);
+      document.getElementById('display').innerText = formattedTime;
+    }
+
+    function formatTime(time) {
+      const totalSeconds = Math.floor(time / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const milliseconds = Math.floor((time % 1000) / 10);
+      return `${pad(minutes)}:${pad(seconds)}:${pad(milliseconds)}`;
+    }
+
+    function calculateLapTime() {
+      const lapTime = Date.now() - startTime - (lapCount * 1000);
+      return formatTime(lapTime);
+    }
+
+    function pad(num) {
+      return num < 10 ? `0${num}` : num;
+    }
+
+    // Add event listeners to buttons
+    document.getElementById('startStop').addEventListener('click', startStop);
+    document.getElementById('reset').addEventListener('click', reset);
+    document.getElementById('lap').addEventListener('click', recordLap);
+  </script>
+</body>
+</html>
